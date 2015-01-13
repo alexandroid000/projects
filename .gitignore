@@ -1,0 +1,10 @@
+*py[cdo]
+*~
+*.bak
+.#*
+*.pipe
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
