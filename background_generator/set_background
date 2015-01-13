@@ -1,0 +1,29 @@
+#!/usr/bin/zsh
+
+WORKING_DIR="/home/alli/media/pics/backgrounds/image"
+
+# check internet connection
+ping -c 1 -W 2 google.com &
+if [[ "$?" != "0" ]]; then
+    echo "No internet connection"
+    exit 1
+fi
+
+# call python program with like/dislike variable ($1, specificed in i3 config)
+# and filename of image
+cd $WORKING_DIR
+IMAGE_NAME=$(ls | grep -v '\.txt')
+echo "Found old image," $IMAGE_NAME
+echo "Generating new search"
+python -m search_generator $1 $IMAGE_NAME
+
+# check that the python program successfully downloaded another image
+# depends on no other files being stored in this directory
+if [[ $(ls -1 | wc -l) == "3" ]]; then
+    rm $IMAGE_NAME
+    IMAGE_NAME=$(ls | grep -v '\.txt')
+    echo "Found new image," $IMAGE_NAME
+
+    feh  --bg-scale $IMAGE_NAME
+fi
+
