@@ -3,7 +3,7 @@
 WORKING_DIR="/home/alli/media/pics/backgrounds/image"
 
 # check internet connection
-ping -c 1 -W 2 google.com &
+ping -c 1 -W 2 google.com
 if [[ "$?" != "0" ]]; then
     echo "No internet connection"
     exit 1
@@ -25,5 +25,8 @@ if [[ $(ls -1 | wc -l) == "3" ]]; then
     echo "Found new image," $IMAGE_NAME
 
     feh  --bg-scale $IMAGE_NAME
+    if [[ "$?" != "0" ]]; then
+        set_background 0
+    fi
 fi
 

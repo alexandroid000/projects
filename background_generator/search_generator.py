@@ -198,4 +198,4 @@ if __name__ == "__main__":
             out_file.write(data)
             out_file.close()
     except:
-        print("Could not open image URL for download, try again")
+        print("404 error with image URL, try again")
