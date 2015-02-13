@@ -192,10 +192,11 @@ if __name__ == "__main__":
 
     # download image
     try:
-        with urllib.request.urlopen(image_url) as response, open(image_name, 'wb') as out_file:
+        with urllib.request.urlopen(image_url, timeout=5) as response, open(image_name, 'wb') as out_file:
             print("Saving as ", image_name)
             data = response.read() # a `bytes object
             out_file.write(data)
             out_file.close()
     except:
         print("404 error with image URL, try again")
+        exit(1)

@@ -1,5 +1,7 @@
 #!/usr/bin/zsh
 
+exec > "/home/alli/bin/cb_out"
+
 WORKING_DIR="/home/alli/media/pics/backgrounds/image"
 
 # check internet connection
@@ -17,6 +19,16 @@ echo "Found old image," $IMAGE_NAME
 echo "Generating new search"
 python -m search_generator $1 $IMAGE_NAME
 
+# if download fails, run script again - will generate new random search
+# trying twice catches a majority of the times it fails to download
+if [[ "$?" != 0 ]]; then
+    python -m search_generator $1 $IMAGE_NAME
+    # exit out if it still fails
+    if [[ "$?" != 0 ]]; then
+        exit -1
+    fi
+fi
+
 # check that the python program successfully downloaded another image
 # depends on no other files being stored in this directory
 if [[ $(ls -1 | wc -l) == "3" ]]; then
@@ -25,8 +37,6 @@ if [[ $(ls -1 | wc -l) == "3" ]]; then
     echo "Found new image," $IMAGE_NAME
 
     feh  --bg-scale $IMAGE_NAME
-    if [[ "$?" != "0" ]]; then
-        set_background 0
-    fi
+    # if feh fails, image was in wrong format, will have to manually run search again
 fi
 
