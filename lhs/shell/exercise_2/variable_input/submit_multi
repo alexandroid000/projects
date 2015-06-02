@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Some Constants
+slurm_template="submit_template"
+
+# Get Input Dir
+input_dir="$1"
+if [ ! -d "$input_dir" ]
+then
+    echo "Usage: $0 <inputs_directory>"
+    echo "Exiting..."
+    exit 1
+fi
+
+# Get List of Inputs
+pwd
+ls
+ls $input_dir/*
+inputs=($(ls $input_dir/*))
+
+# Loop over each input file
+# Could say:
+#   for input in $(ls tsp*.in)
+# instead of breaking it into multiple lines
+for input in ${inputs[@]}
+do
+    # Make dir_name, create directory, copy files into it
+    dir_name="${input%.in}"
+    dir_name="${input#*/}"
+    mkdir "$dir_name"
+    mv "$input" "$dir_name"
+    input="${input#*/}"
+    sub_file="$dir_name/$slurm_template"
+    cp "$slurm_template" "$sub_file"
+
+    # Modify our submission file with the correct info
+    sed -i 's/{JOB_NAME}/'"$input"'/' "$sub_file"
+    sed -i 's!{INPUT_FILE}!'"$dir_name/$input"'!' "$sub_file"
+
+    # Submit our job (commented out cause we're not on a supercomputer)
+    # sbatch "$sub_file"
+
+    # Instead we can run the submission file directly
+    # Afterall, it's just a bash script with some metadata
+    # bash "$sub_file" &> "$dir_name/tsp.out"
+
+    # If we want them to all run we can background each
+    bash "$sub_file" &> "$dir_name/tsp.out" &
+done

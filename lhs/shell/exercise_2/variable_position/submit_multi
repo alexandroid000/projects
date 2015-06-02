@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Some Constants
+slurm_template="submit_template"
+
+# Get Input File
+input="$1"
+positions="$2"
+if [ ! -f "$input" -o ! -f "$positions" ]
+then
+    echo "Usage: $0 <input_file> <positions_file>"
+    echo "Exiting..."
+    exit 1
+fi
+
+# Loop over all the positions
+while read pos
+do
+    # Make dir_name, create directory, copy files into it
+    dir_name="tsp_pos_${pos// /_}"
+    mkdir "$dir_name"
+    curr_input="$dir_name/$input"
+    cp "$input" "$curr_input"
+    sub_file="$dir_name/$slurm_template"
+    cp "$slurm_template" "$sub_file"
+
+    # Modify our submission file with the correct info
+    sed -i 's/{JOB_NAME}/'"$input"'/' "$sub_file"
+    sed -i 's!{INPUT_FILE}!'"$curr_input"'!' "$sub_file"
+    sed -i 's/{VARIABLE_POSITION}/'"$pos"'/' "$curr_input"
+
+    # Submit our job (commented out cause we're not on a supercomputer)
+    # sbatch "$sub_file"
+
+    # Instead we can run the submission file directly
+    # Afterall, it's just a bash script with some metadata
+    # bash "$sub_file" &> "$dir_name/tsp.out"
+
+    # If we want them to all run we can background each
+    bash "$sub_file" &> "$dir_name/tsp.out" &
+done < "$positions"
